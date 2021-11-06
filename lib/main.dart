@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import './question.dart';
+import './quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
+
+QuizBrain quizBrain = QuizBrain();
+
 
 void main() => runApp(const MyApp());
 
@@ -30,44 +35,40 @@ class Quiz extends StatefulWidget {
 }
 
 class _QuizState extends State<Quiz> {
-  int index = 0;
-  void click() {
-    setState(() {
-      if (index < questionBank.length - 1) {
-        index++;
-      } else {
-        questionBank.last;
-      }
-    });
-  }
-  void Fclick() {
-    setState(() {
-      if(index!=0)
+ 
+  List<Icon> score =  [];
+  
+   void chooseAns(bool pickAns){
+   bool getans = quizBrain.getAnswer();
+   setState(() {
+     if (quizBrain.isFinished()==true){
+        Alert(context: context,
+            title: "The Quiz is Finished",
+            desc: "Reseting"
+         ).show();   
+       quizBrain.reset();
+        score=[];
+     }
+     else {
+       quizBrain.nextQuestion();
+     }
+      if(pickAns==getans)
       {
-      index --;
+        score.add(Icon(Icons.check,
+        color:Colors.green,));
       }
-      else
-      {
-        questionBank.first;
+      else{
+        score.add(Icon(Icons.close,
+        color: Colors.red,),);
       }
-    });
-  }
+   });
+   
+   
+   }
 
-  List<Icon> check = const [
-    Icon(
-      Icons.check,
-      color: Colors.green,
-    ),
-    Icon(
-      Icons.close,
-      color: Colors.red,
-    ),
-  ];
-  List<Question> questionBank = [
-    Question("Some cats are actually allergic to humans", true),
-    Question('You can lead a cow down stairs but not up stairs.', false),
-    Question('Approximately one quarter of human bones are in the feet.', true),
-  ];
+        
+ 
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -79,7 +80,7 @@ class _QuizState extends State<Quiz> {
             child: Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
-                questionBank[index].questionText,
+                quizBrain.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -103,7 +104,7 @@ class _QuizState extends State<Quiz> {
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
               ),
               onPressed: () {
-                click();
+                chooseAns(true);
               },
             ),
           ),
@@ -122,13 +123,13 @@ class _QuizState extends State<Quiz> {
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.red),
               ),
               onPressed: () {
-                Fclick();
+                chooseAns(false);
               },
             ),
           ),
         ),
         Row(
-          children: check,
+          children: score,
         )
       ],
     );
